@@ -1,0 +1,4 @@
+ero igxu 0
+eron igxu 1
+er = "eron"
+print(ero)
