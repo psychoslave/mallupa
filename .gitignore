@@ -39,3 +39,6 @@ luac.out
 *.x86_64
 *.hex
 
+# Generitaj dosieroj dum tradukado de ltokenp
+fontaro/ltokenp/llex.c
+fontaro/ltokenp/ltokenp
