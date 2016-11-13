@@ -1,0 +1,45 @@
+ltokenp is a token processor for Lua: it allows you to process the
+stream of tokens coming from the Lua lexer.
+
+Potential uses include:
+- Compressing Lua programs by removing comments and whitespace (strip.lua)
+- Removing assertions (assert.lua)
+- Adding new syntax sugar (self.lua)
+- Experimenting with new syntax without hacking the Lua source (reserved.lua)
+
+ltokenp accepts Lua scripts to run and files to process.
+The scripts and files are executed and processed as seen.
+Each script appears as a separate argument after '-s', one '-s' per script.
+
+Scripts typically output the contents of the files with some modifications.
+Unfortunately, all comments and whitespace are eaten by the lexer and never
+reach the token stream.
+
+A typical usage is
+	ltokenp -s script.lua [file.lua ...]
+but you can also do
+	ltokenp -s s1.lua f1.lua -s s2.lua f2.lua
+
+A global function named FILTER will be called once for each token seen
+in the files. So, scripts typically define FILTER. If no scripts are
+given, ltokenp just dumps the token stream with this:
+
+	function FILTER(line,token,text,value)
+		print(line,token,text,value)
+	end
+
+As can been above, the FILTER function receives 4 arguments from the lexer:
+- the line number where the token appears
+- the token as a number
+- the token as text
+- the value of names, numbers, and strings;
+  for other tokens, the value is the same as the text.
+
+To try ltokenp, just edit Makefile to reflect your installation of Lua
+and then run make. This will build ltokenp and run a simple test. Note
+that ltokenp needs inside information from the Lua private headers and
+so it needs to be built using a Lua build directory, not just the usual
+installation directories.
+
+This code is hereby placed in the public domain.
+Please send comments, suggestions, and bug reports to lhf@tecgraf.puc-rio.br .
