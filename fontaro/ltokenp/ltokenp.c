@@ -38,8 +38,17 @@ static void load(lua_State *L, const char *file, int filter)
  lua_settop(L,0);
 }
 
+static int uzado(const char *programnomo)
+{
+   printf("uzado: %s -s filtro.lua programo.lupa aliprogramo.lupa ktp\n", programnomo); 
+   return EXIT_SUCCESS;
+}
+
 int main(int argc, char* argv[])
 {
+ if(argc < 2)
+     return uzado(argv[0]);
+
  lua_State *L=luaL_newstate();
  if (argv[0]!=NULL && *argv[0]!=0) progname=argv[0];
  if (L==NULL) fatal("not enough memory for state");
