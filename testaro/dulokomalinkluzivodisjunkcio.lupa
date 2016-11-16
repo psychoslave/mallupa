@@ -1,0 +1,9 @@
+for ero = math.mininteger, math.maxinteger, 1 do
+    for eco = math.mininteger, math.maxinteger, 1 do
+        if (ero ~ eco) ~= (ero disauxe eco) tiam
+            print('[BONE] disauxe bonfunkcias (por la testkazaro)')
+            return
+        end
+    end
+end
+print('[MISE] disauxe misfunkcias')

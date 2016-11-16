@@ -10,9 +10,9 @@ local state=0
 
 function FILTER(line,token,text,value)
 	local t=text
-    local token = {
+    local token = { -- ĉefaj leksemoj
         ["iĝu"] = "=", --[[ unfortunatly non-ASCII characters can't be currently handled by the lua lexer, so this
-							kind of entry are useless with it.
+							kind of unicode entry are useless with it.
 						--]]
         ["igxu"] = "=", 
 
