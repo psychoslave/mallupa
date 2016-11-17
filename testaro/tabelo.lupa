@@ -1,0 +1,16 @@
+elemento igxu 0
+elementon igxu 1
+elemento igxu "elementon"
+tabelo igxu { ["testo"] igxu "bone" }
+tabelen vorto igxu "bonege"
+tabelo kies eniga ero igxu 3 
+tabelo kies "mistero" ero igxu "nekredeble!"
+tabelo kies "misterego"a ero igxu "nekredeble!!"
+tabelo kies en3a ero igxu 3 alt 3
+print(elemento)
+print(tabele testo)
+print(tabele vorto)
+
+print(tabele enigo)
+print(tabele mistero)
+print(tabelo[3])

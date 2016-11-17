@@ -1,20 +1,20 @@
--- token filter: for now, just define 'iĝu' as an alias to the affecation operator '='
+-- leksio filter: for now, just define 'iĝu' as an alias to the affecation operator '='
 
-local function emit(...)
+local function eligu(...)
 	io.write(...)
 	io.write(" ")
-	io.write("\n")
+	-- io.write("\n")
 end
 
 local state=0
 
-function FILTER(line,token,text,value)
+function FILTER(line,leksio,text,valoro)
 	local t=text
-    local token = { -- ĉefaj leksemoj
+    local leksio = { -- ĉefaj leksemoj
+        ["igxu"] = "=", 
         ["iĝu"] = "=", --[[ unfortunatly non-ASCII characters can't be currently handled by the lua lexer, so this
 							kind of unicode entry are useless with it.
 						--]]
-        ["igxu"] = "=", 
 
 		["disaŭe"] = "~",
 		["disauxe"] = "~",
@@ -22,12 +22,12 @@ function FILTER(line,token,text,value)
 		["nee"] = "~",
 		["kaje"] = "&",
 
-		["aŭe"] = "|",
-		["auxe"] = "|",
-		["kajaŭ"] = "|",
 		["kajaux"] = "|",
-		["kaŭ"] = "|",
+		["kajaŭ"] = "|",
+		["auxe"] = "|",
+		["aŭe"] = "|",
 		["kaux"] = "|",
+		["kaŭ"] = "|",
 
 		["sobŝove"] = ">>",
 		["sobsxove"] = ">>",
@@ -35,30 +35,42 @@ function FILTER(line,token,text,value)
 		["sorŝove"] = "<<",
 		["sorsxove"] = "<<",
         
-		["egalas" ] = "==",
-        ["egaliĝas"] = "==",
         ["egaligxas"] = "==",
+        ["egaliĝas"] = "==",
+        ["malalias"] = "==",
+		["egalas" ] = "==",
         ["samas"] = "==",
 
-		["neegalas"] = "~=",
-        ["neegaliĝas"] = "~=",
+        ["malegaligxas"] = "~=",
+        ["malegaliĝas"] = "~=",
         ["neegaligxas"] = "~=",
+        ["neegaliĝas"] = "~=",
+		["neegalas"] = "~=",
         ["malsamas"] = "~=",
+        ["alias"] = "~=",
 
-		["superas"] = ">",
         ["superiĝas"] = ">",
+        ["malantaux"] = ">",
+        ["malantaŭ"] = ">",
+		["superas"] = ">",
+        ["post"] = ">",
 
-		["estas malpli granda ol "] = "<",
-        ["infraas**"] = "<",
         ["malsuperas"] = "<",
+        ["infraas"] = "<",
+        ["antaux"] = "<",
+        ["antaŭ"] = "<",
         ["men"] = "<",
 
-		["almenaŭas "] = ">=",
+		["almenaŭas"] = ">=",
+		["almenauxas"] = ">=",
+		["minimumas"] = ">=",
         ["suras"] = ">=",
 
-		["subas"] = "<=",
+        ["malalmenauxas"] = "<=",
         ["malalmenaŭas"] = "<=",
+        ["maksimumas"] = "<=",
         ["malsuras"] = "<=",
+		["subas"] = "<=",
 
 		["plus"] = "+",
 
@@ -133,9 +145,10 @@ function FILTER(line,token,text,value)
         ["verba"] = "function",
         ["funkcia"] = "function",
 
-		["kies"] = "[", -- do oni skribas "tabelo['enigo'] = 3" kiel "tabelo kies enigro ere iĝu 3"
-		["ere"] = "]",
-
+		["kies"] = "[", -- do oni skribas "tabelo['enigo'] = 3" kiel "tabelo kies eniga ero iĝu 3"
+		["ero"] = "]",
+		["a"] = "",
+		
 		["ties"] = ".",
 
 		["de"] = "{", -- do oni scribas "elementaro = { 1, 2, 3 }" kiel "elementaro iĝu de 1, 2, 3 are"
@@ -189,34 +202,69 @@ function FILTER(line,token,text,value)
 		["ĝis"] = "until",
 		["gxis"] = "until",
 		["dum"] = "while",
+
     }
-    local token_pattern = {
-        "(%a+)on?$", -- match both nominative and accusative: ekzemplo, ekzemplon (but not the ekzempl’ apocope)
-        "(%a+)[iu]$", -- match both infinitive and volitive : ekzempli, ekzemplu (but not the ekzempl’ apocope)
+	local malfleksii = function(fleksieco) 
+		return function(valoro) return string.match(valoro, fleksieco) end
+		end
+
+    local leksifleksiecaro = { -- leksia (leksikera) fleksi-eca aro
+        ["(%a+o)n?$"] = malfleksii, -- match both nominative and accusative: ekzemplo, ekzemplon (but not the ekzempl’ apocope)
+        ["(%a+)[iu]$"] =  malfleksii, -- match both infinitive and volitive : ekzempli, ekzemplu
+		["^en(%d+)an?$"] = malfleksii, -- en3a -> 3, certe "3a" estus plibona, sed la disleksemilo kraŝas kiel ĝi trovas ĉeno tiele formita. 
         --[[
-		["i"] = "(",
-		["u"] = "(",
-		["(%a+)e"] = "[", -- do oni skribas "tabelo[enigo] = 3" kiel "tabele enigo iĝu 3"
+		["i$"] = "(",
+		["u$"] = "(",
+		["(%a+)e[n]$"] = "[", -- do oni skribas "tabelo[enigo] = 3" kiel "tabelen enigo iĝu 3"
         -- ideo : distingi -e kaj -en, do ni havas 
-        -- tabelo["enigo"] = 3          | tabelo.enigo = 3 | aĵo = tabelo.enigo
-        -- tabelo kies enigo ere iĝu 3  | tabelen enigo iĝu 3
+        -- tabelo["enigo"] = 3            | tabelo.enigo = 3 | aĵo = tabelo.enigo | tabelo[1] = 3 
+        -- tabelo kies "enigo" ero iĝu 3  |  				 |					  |
+		-- tabelo kies "enigo"a ero iĝu 3 |					 |					  | tabelo kies 1a ero îgu 3
+		-- 								  |										  | 1a-tabelero iĝu 3 -- necesas sintaksan modifion
+		--																		  | 1a-tabeleriĝu 3
+		-- tabelo kies eniga ero iĝu 3 -- atentu la kazoj kie kaj "eniga", kaj "enig", kaj "enigo" estas tabelenigoj 
+        -- tabelo kies enigero iĝu 3 -- necesas memori ĉiuj identigiloj kaj ne ĉiam akopi -ero. Ekzemple se  "vespero"
+        --                              estas identigilo, la tradukilo devas provizi "vesper", anstataŭ "vesp"
+		-- 								  | tabelen enigero iĝu 3  -- tie, variablo povus indiki ke ni antaŭe malfermis 
+        --                                                         	  tabelan konsteksto kun -en		 
+		--								  | tabelen enigo iĝu 3
+        --                                | tabelenigeriĝu 3       -- ne facile traktebla, ĉar ekzistas tro da disleksemigebloj
+        --                                | tabel-enigeriĝu 3      -- far pli facile traktebale, sed  "-" estas uzita kiel substrakto operatoro per Lua
+		-- 												      | aĵo iĝu tabele enigo
+		-- laŭecformo				traduko
+		-- "(%a)en?$"  				"."
+		-- "kies" 					"["
+		-- "ero" 					"]"
+		-- "%a([%a%d])+a$" 			""		-- malplena ĉeno
         ]]--
+		["(%a+)en?$"] = function(valoro) return  malfleksii("(%a+)en?$")(valoro) .. "o." end,
+		["(%a+)an?$"] = function(valoro) return  "'" .. malfleksii("(%a+)an?$")(valoro) .. "o'" end,
     }
-	if t=="<file>" or t=="<eof>" then return end
-	if t=="<string>" then value=string.format("%q",value) end
+
+
+	for fleksieco, lauxige in pairs(leksifleksiecaro) do
+		if lauxige == malfleksii then
+    		leksifleksiecaro[fleksieco] = lauxige(fleksieco) -- platigas al la sennoma funkcio "function(valoro)" kun la "fleksieco" laŭeco
+		end 
+	end
+
+	if t =="<file>" or t=="<eof>" then return end
+	if t =="<string>" then 
+		valoro = string.format("%q",valoro)
+	end
     if t == "<name>" then
-        if token[value] then
-            value = token[value]
+        if leksio[valoro] then
+            valoro = leksio[valoro]
         else
-            for drop, pattern in ipairs(token_pattern) do
-                if string.match(value, pattern)  then
-                    value = string.match(value, pattern)
+            for fleksieco, malfleksu in pairs(leksifleksiecaro) do
+                if string.match(valoro, fleksieco)  then
+                    valoro = malfleksu(valoro)
                     break
                 end
             end
         end
 	end
-    emit(value)
-    --emit(text .. ':' .. value)
-    --]]
+    eligu(valoro)
+    --eligu(text .. ':' .. valoro .. '\n')
+--]]
 end
