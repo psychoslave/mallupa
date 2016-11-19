@@ -60,8 +60,9 @@ TO_BIN= $(MYNAME)
 #TO_INC= 
 #TO_LIB= 
 #TO_MAN= 
-MALLUPTEKO= mallupe.lua
-TO_LMOD= ../${MALLUPTEKO}
+MALLUPTEKO= plenesperanta.lua
+TO_LMOD= ../dialektaro/esperanta/${MALLUPTEKO}
+ALLUAIGILO= mallupe
 
 all:	test
 
@@ -77,7 +78,7 @@ llex.c:
 llex.o:	proxy.c
 
 clean:
-	-rm -f $(OBJS) core core.* a.out $(MYNAME) llex.c
+	-rm -f $(OBJS) core core.* a.out $(MYNAME) llex.c $(ALLUAIGILO)
 
 
 install: dummy
@@ -87,8 +88,8 @@ install: dummy
 	#$(INSTALL_DATA) $(TO_LIB) $(INSTALL_LIB)
 	#$(INSTALL_DATA) $(TO_MAN) $(INSTALL_MAN)
 	$(INSTALL_DATA) $(TO_LMOD) $(INSTALL_LMOD)
-	echo -e "#!/bin/sh\n${MYNAME} -s ${INSTALL_LMOD}/${MALLUPTEKO}" '$$@ | lua' >mallupe
-	$(INSTALL_EXEC) mallupe $(INSTALL_BIN)
+	echo -e "#!/bin/sh\n${MYNAME} -s ${INSTALL_LMOD}/${MALLUPTEKO}" '$$@ | lua' >$(ALLUAIGILO)
+	$(INSTALL_EXEC) $(ALLUAIGILO) $(INSTALL_BIN)
 
 uninstall:
 	cd $(INSTALL_BIN) && $(RM) $(TO_BIN)
